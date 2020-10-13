@@ -1,8 +1,3 @@
-import processing.awt.PSurfaceAWT.SmoothCanvas;
-import javax.swing.JFrame;
-import java.awt.Dimension;
-
-
 ArrayList<Gate> gates = new ArrayList<Gate>();
 ArrayList<CustomGate> customGates = new ArrayList<CustomGate>();
 ArrayList<Button> buttons = new ArrayList<Button>();
@@ -17,6 +12,7 @@ CustomGate copy = null;
 
 Boolean creatingCustom = false;
 PVector[] customPoints = new PVector[3];
+PVector screenRes = null;
 
 
 int[] updates = new int[4]; //draw, powercheck, polycheck, all
@@ -25,11 +21,6 @@ void setup() {
   size(1400, 800,P2D);
   surface.setResizable(true);
   registerMethod("pre", this);
- 
-  //final SmoothCanvas sc = (SmoothCanvas) getSurface().getNative();
-  //final JFrame jf = (JFrame) sc.getFrame();
-  //final Dimension d = new Dimension(400, 300);
-  //jf.setMinimumSize(d);
   
   buttons.add(new Button("AND", new PVector(15, buttons.size()*85+15)));
   buttons.add(new Button("NAND", new PVector(15, buttons.size()*85+15)));
@@ -50,10 +41,14 @@ void setup() {
   images[6] = loadImage("Data/paste.png");
   globalOffset = new PVector(0, 0);
   frameRate(60);
+  screenRes = new PVector(width,height);
 }
 
 void pre() {
-  shouldDraw = true;
+  if(screenRes.x != width || screenRes.y != height){
+    screenRes = new PVector(width,height);
+    shouldDraw = true;
+  }
 }
 
 boolean pixelInPoly(PVector[] verts, PVector pos) {
@@ -110,13 +105,21 @@ void line(PVector point1, PVector point2, String type, Boolean os) {
 
 void draw() {
   if(frameCount % 100 == 0) {
-   //println("\nAll Updates Last 100 Frames:\n\tAll: " + updates[3] + "\t" + nf(updates[3]/100.0f,0,2) + " ~ updates per frame." + "\n\tDrawing:" + updates[0] + "\n\tPoly Check:" + updates[1] + "\n\tGate Powered:" + updates[2]);
+   println("\nAll Updates Last 100 Frames:\n\tAll: " + updates[3] + "\t" + nf(updates[3]/100.0f,0,2) + " ~ updates per frame." + "\n\tDrawing:" + updates[0] + "\n\tPoly Check:" + updates[1] + "\n\tGate Powered:" + updates[2]);
    updates = new int[4];
   }
+  noStroke();
+  fill(255);
+  rect(width-100,36,100,14);
+  textSize(16);
+  textAlign(RIGHT);
+  fill(0);
+  text("FPS: " + ceil(frameRate),width-10,48);
+  //Only activate if should draw
   if(shouldDraw){
-    background(51);
-    drawBackground();
+    background(20);
     
+    drawBackground();
     for (CustomGate cg : customGates) {
       cg.show();
     }
@@ -132,7 +135,7 @@ void draw() {
     if (editing != null && outputIndex >= 0) line(PVector.mult(PVector.add(editing.position, editing.outputs.get(outputIndex)), globalScale), new PVector(mouseX, mouseY), globalLines, true);
 
     noStroke();
-    fill(200);
+    fill(255);
     rect(0, 0, 80, height);
     fill(255);
     rect(80,0,width-80,50);
@@ -215,7 +218,7 @@ void draw() {
     textAlign(RIGHT);
     text("Zoom: x"+nf(globalScale,0,1),width-10,16);
     text("Gates: " + (gates.size()+customGates.size()),width-10,32);
-    text("FPS: " + round(frameRate),width-10,48);
+    text("FPS: " + ceil(frameRate),width-10,48);
     shouldDraw = false;
     updates[0] += 1;
     updates[3] += 1;
@@ -381,7 +384,7 @@ void mouseReleased() {
     customGates.add(cg);
     customGates.get(customGates.size()-1).position = new PVector(mouseX/globalScale,mouseY/globalScale);
     customGates.get(customGates.size()-1).name = copy.name;
-    customGates.get(customGates.size()-1).shapes = copy.shapes;
+    customGates.get(customGates.size()-1).shapes = copy.shapes; //<>//
     customGates.get(customGates.size()-1).locked = copy.locked;
     customGates.get(customGates.size()-1).blueprintSize = copy.blueprintSize;
     customGates.get(customGates.size()-1).minimized = copy.minimized;
@@ -431,9 +434,8 @@ void mouseReleased() {
     }
     Boolean inputFound = false, outputFound = false;
     for(Gate g : cg.localGates){
-      println(g.type + "\n" + (g.connections_in == null) + "\n" + (g.connections_out.size() == 0));
-      if (g.type == "INPUT" || g.connections_in == new Connection[g.inputs.size()]) inputFound = true;
-      if (g.type == "OUTPUT" || g.connections_out.size() == 0) outputFound = true;
+      if (g.type == "INPUT" || g.inputsNullCheck() && g.connections_out.size() != 0) inputFound = true;
+      if (g.type == "OUTPUT" || g.connections_out.size() == 0 && !g.inputsNullCheck()) outputFound = true;
     }
     if(inputFound && outputFound) {
       cg.setupGate();
