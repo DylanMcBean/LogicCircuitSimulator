@@ -22,15 +22,16 @@ void setup() {
   surface.setResizable(true);
   registerMethod("pre", this);
   
-  buttons.add(new Button("AND", new PVector(15, buttons.size()*85+15)));
-  buttons.add(new Button("NAND", new PVector(15, buttons.size()*85+15)));
-  buttons.add(new Button("NOT", new PVector(15, buttons.size()*85+15)));
-  buttons.add(new Button("OR", new PVector(15, buttons.size()*85+15)));
-  buttons.add(new Button("NOR", new PVector(15, buttons.size()*85+15)));
-  buttons.add(new Button("XOR", new PVector(15, buttons.size()*85+15)));
-  buttons.add(new Button("XNOR", new PVector(15, buttons.size()*85+15)));
-  buttons.add(new Button("INPUT", new PVector(15, buttons.size()*85+15)));
-  buttons.add(new Button("OUTPUT", new PVector(15, buttons.size()*85+15)));
+  buttons.add(new Button("AND","AND", new PVector(15, buttons.size()*85+15)));
+  buttons.add(new Button("NAND","NAND", new PVector(15, buttons.size()*85+15)));
+  buttons.add(new Button("NOT","NOT", new PVector(15, buttons.size()*85+15)));
+  buttons.add(new Button("OR","OR", new PVector(15, buttons.size()*85+15)));
+  buttons.add(new Button("NOR","NOR", new PVector(15, buttons.size()*85+15)));
+  buttons.add(new Button("XOR","XOR", new PVector(15, buttons.size()*85+15)));
+  buttons.add(new Button("XNOR","XNOR", new PVector(15, buttons.size()*85+15)));
+  buttons.add(new Button("INPUT_BUTTON","BUTTON", new PVector(15, buttons.size()*85+15)));
+  buttons.add(new Button("INPUT","INPUT", new PVector(15, buttons.size()*85+15)));
+  buttons.add(new Button("OUTPUT","OUTPUT", new PVector(15, buttons.size()*85+15)));
 
   images[0] = loadImage("Data/recycle-bin.png");
   images[1] = loadImage("Data/blueprint.png");
@@ -266,44 +267,8 @@ void mousePressed() {
         if (pixelInPoly(b.shapes.get(0).points, PVector.sub(new PVector(mouseX, mouseY), b.position))) {
           Gate _new = null;
           globalScale = holder;
-          switch(b.name) {
-          case "AND": 
-            _new = new Gate("AND", PVector.div(new PVector(mouseX, mouseY),globalScale));
-            gates.add(_new);
-            break;
-          case "NAND": 
-            _new = new Gate("NAND", PVector.div(new PVector(mouseX, mouseY),globalScale));
-            gates.add(_new);
-            break;
-          case "NOT": 
-            _new = new Gate("NOT", PVector.div(new PVector(mouseX, mouseY),globalScale));
-            gates.add(_new);
-            break;
-          case "OR": 
-            _new = new Gate("OR", PVector.div(new PVector(mouseX, mouseY),globalScale));
-            gates.add(_new);
-            break;
-          case "NOR": 
-            _new = new Gate("NOR", PVector.div(new PVector(mouseX, mouseY),globalScale));
-            gates.add(_new);
-            break;
-          case "XOR": 
-            _new = new Gate("XOR", PVector.div(new PVector(mouseX, mouseY),globalScale));
-            gates.add(_new);
-            break;
-          case "XNOR": 
-            _new = new Gate("XNOR", PVector.div(new PVector(mouseX, mouseY),globalScale));
-            gates.add(_new);
-            break;
-          case "INPUT": 
-            _new = new Gate("INPUT", PVector.div(new PVector(mouseX, mouseY),globalScale));
-            gates.add(_new);
-            break;
-          case "OUTPUT": 
-            _new = new Gate("OUTPUT", PVector.div(new PVector(mouseX, mouseY),globalScale));
-            gates.add(_new);
-            break;
-          }
+          _new = new Gate(b.name, PVector.div(new PVector(mouseX, mouseY),globalScale));
+          gates.add(_new);
           editing = _new;
           outputIndex = -2;
         }
@@ -546,6 +511,10 @@ void mouseClicked() {
       if (pixelInPoly(s.shapes.get(0).points, PVector.sub(new PVector(mouseX, mouseY), PVector.mult(s.position, globalScale))) && s.type == "INPUT") {
         s.powered = !s.powered;
         s.calculatePowered();
+      } else if (pixelInPoly(s.shapes.get(0).points, PVector.sub(new PVector(mouseX, mouseY), PVector.mult(s.position, globalScale))) && s.type == "INPUT_BUTTON") {
+        s.powered = !s.powered;
+        s.calculatePowered();
+        s.poweredFramesLeft = s.poweredFramesMax;
       }
     }
   }

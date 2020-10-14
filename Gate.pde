@@ -8,6 +8,7 @@ class Gate {
   Connection[] connections_in;
   ArrayList<Gate> connections_out = new ArrayList<Gate>();
   Boolean powered = false, hidden = false;
+  int poweredFramesMax = 0, poweredFramesLeft = 0;
   Boolean shouldCalculatePowered = false;
 
   Gate(String name, PVector pos) {
@@ -42,14 +43,10 @@ class Gate {
       for (Shape shape : shapes) {
         if (outline) stroke(0);
         else noStroke();
-        if (type == "OUTPUT" && powered) {
+        if (type.matches("OUTPUT|INPUT|INPUT_BUTTON") && powered) {
           stroke(0, 150, 80);
           strokeWeight(2*globalScale);
           fill(0, 200, 100);
-        } else if (type == "INPUT" && powered) {
-          stroke(0, 200, 100);
-          strokeWeight(2*globalScale);
-          fill(0,200,100);
         } else {
           fill(shape.fill);
         }
@@ -104,6 +101,8 @@ class Gate {
     }
     if(this.shouldCalculatePowered) calculatePowered();
     this.shouldCalculatePowered = false;
+    powerDown();
+    
   }
   
   boolean inputsNullCheck(){
@@ -111,6 +110,16 @@ class Gate {
       if (c != null) return false;
     }
     return true;
+  }
+  
+  void powerDown(){
+    if(this.poweredFramesMax > 0) {
+      if(this.poweredFramesLeft > 0) this.poweredFramesLeft --;
+      if(this.poweredFramesLeft == 0 && this.powered){
+        this.powered = false;
+        this.shouldCalculatePowered = true;
+      }
+    }
   }
 
   void getShape(String name) {
@@ -165,6 +174,12 @@ class Gate {
     case "INPUT":
       this.shapes.add(new Shape(new PVector[]{new PVector(0, 0), new PVector(0, 20),new PVector(20,20), new PVector(20, 0)}, color(231,102,140), false));
       outputs.add(new PVector(20, 10));
+      break;
+    case "INPUT_BUTTON":
+      this.shapes.add(new Shape(new PVector[]{new PVector(0, 0), new PVector(0, 20),new PVector(20,20), new PVector(20, 0)}, color(231,102,140), false));
+      this.shapes.add(new Shape(new PVector[]{new PVector(13,17),new PVector(15,16),new PVector(16,15),new PVector(17,13),new PVector(17,6),new PVector(16,4),new PVector(15,3),new PVector(13,2),new PVector(6,2),new PVector(4,3),new PVector(3,4),new PVector(2,6),new PVector(2,13),new PVector(3,15),new PVector(4,16),new PVector(6,17)}, color(231,231,102), false));
+      outputs.add(new PVector(20, 10));
+      poweredFramesMax = 60;
       break;
     case "OUTPUT":
       this.shapes.add(new Shape(new PVector[]{new PVector(0, 10), new PVector(20, 0), new PVector(20, 20)}, color(231,102,140), false));
