@@ -49,6 +49,7 @@ void pre() {
     screenRes = new PVector(width,height);
     shouldDraw = true;
   }
+  shouldDraw = true;
 }
 
 boolean pixelInPoly(PVector[] verts, PVector pos) {
@@ -126,7 +127,6 @@ void draw() {
     
     for (Gate s : gates) {
       s.show();
-      //s.calculatePowered();
     }
 
     stroke(255);
@@ -234,17 +234,15 @@ void mousePressed() {
       for (Gate s : gates) {
         if((s.hidden == false || s.type == "OUTPUTbp") && s.position.x > -100 && s.position.x < (width+20)/globalScale && s.position.y > -100 && s.position.y < (height+20)/globalScale && outputIndex > -3){
           for (int i = 0; i < s.outputs.size(); i++) {
-            if (PVector.dist(new PVector(mouseX, mouseY), PVector.mult(PVector.add(s.position, s.outputs.get(i)), globalScale)) < (8*globalScale)) {
+            if (PVector.dist(new PVector(mouseX, mouseY), PVector.mult(PVector.add(s.position, s.outputs.get(i)), globalScale)) < (50*globalScale) && editing == null|| editing != null && PVector.dist(new PVector(mouseX, mouseY), PVector.mult(PVector.add(s.position, s.outputs.get(i)), globalScale)) < PVector.dist(new PVector(mouseX, mouseY), PVector.mult(PVector.add(editing.position, editing.outputs.get(i)), globalScale))) {
               editing = s;
               outputIndex = i;
-              break;
             }
           }
           if (s.hidden == false && pixelInPoly(s.shapes.get(0).points, PVector.sub(new PVector(mouseX, mouseY), PVector.mult(s.position, globalScale))) && outputIndex > -3) {
             editing = s;
             outputIndex = -2;
           }
-          if (outputIndex != -1) break;
         }
       }
       
@@ -446,32 +444,38 @@ void mouseReleased() {
     }
     customPoints = new PVector[2];
   } else {
+    float closestDist = 10000;
+    int bestIndex = -1;
+    Gate bestGate = null;
     if (outputIndex != -2)
       for (Gate s : gates) {
         if((s.hidden == false || s.type == "INPUTbp" || s.type == "OUTPUTbp") && s.position.x > -100 && s.position.x < (width+20)/globalScale && s.position.y > -100 && s.position.y < (height+20)/globalScale){
           if(s != editing){
             for (int i = 0; i < s.inputs.size(); i++) {
-              if (PVector.dist(new PVector(mouseX, mouseY), PVector.mult(PVector.add(s.position, s.inputs.get(i)), globalScale)) < (12*globalScale)) {
-                if (editing != null){
-                  s.connections_in[i] = new Connection(editing, outputIndex);
-                  editing.connections_out.add(s);
-                  s.calculatePowered();
-                }
-                else if(s.connections_in[i] != null) {
-                  s.connections_in[i].connector.connections_out.remove(s);
-                  s.connections_in[i] = null;
-                  s.calculatePowered();
-                }
-                editing = null;
-                outputIndex = -1;
-                break;
+              float calcDistance = PVector.dist(new PVector(mouseX, mouseY), PVector.mult(PVector.add(s.position, s.inputs.get(i)), globalScale));
+              if (calcDistance < (50*globalScale) && calcDistance < closestDist) {
+                closestDist = calcDistance;
+                bestIndex = i;
+                bestGate = s;
               }
             }
-            if (outputIndex == -1 && editing != null) break;
           }
         }
       }
-
+    if(bestGate != null && closestDist < 10000) {
+      if (editing != null){
+        bestGate.connections_in[bestIndex] = new Connection(editing, outputIndex);
+        editing.connections_out.add(bestGate);
+        bestGate.calculatePowered();
+      }
+      else if(bestGate.connections_in[bestIndex] != null) {
+        bestGate.connections_in[bestIndex].connector.connections_out.remove(bestGate);
+        bestGate.connections_in[bestIndex] = null;
+        bestGate.calculatePowered();
+      }
+      editing = null;
+      outputIndex = -1;
+    }
     if (outputIndex == -2 && mouseY >= height-80 && mouseX >= 80) {
       if (editing.type == "custom") {
         for(int i = customGates.size()-1; i >= 0; i --){

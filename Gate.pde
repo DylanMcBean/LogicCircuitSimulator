@@ -42,9 +42,6 @@ class Gate {
       for (Shape shape : shapes) {
         if (outline) stroke(0);
         else noStroke();
-
-        
-
         if (type == "OUTPUT" && powered) {
           stroke(0, 150, 80);
           strokeWeight(2*globalScale);
@@ -231,10 +228,10 @@ class Gate {
     
     for (Gate g : connections_out) {
       g.shouldCalculatePowered = true;
+      shouldDraw = true;
     }
     updates[1] += 1;
     updates[3] += 1;
-    shouldDraw = true;
   }
 
   void updateConnections() {
