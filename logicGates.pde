@@ -1,6 +1,7 @@
 ArrayList<Gate> gates = new ArrayList<Gate>();
 ArrayList<CustomGate> customGates = new ArrayList<CustomGate>();
 ArrayList<Button> buttons = new ArrayList<Button>();
+ArrayList<Notification> notifications = new ArrayList<Notification>();
 Gate editing;
 int outputIndex = -1;
 PImage[] images = new PImage[7];
@@ -15,6 +16,7 @@ PVector[] customPoints = new PVector[3];
 PVector screenRes = null;
 
 
+PShape notif_shape;
 int[] updates = new int[4]; //draw, powercheck, polycheck, all
 
 void setup() {
@@ -22,27 +24,32 @@ void setup() {
   surface.setResizable(true);
   registerMethod("pre", this);
   
-  buttons.add(new Button("AND","AND", new PVector(15, buttons.size()*85+15)));
-  buttons.add(new Button("NAND","NAND", new PVector(15, buttons.size()*85+15)));
-  buttons.add(new Button("NOT","NOT", new PVector(15, buttons.size()*85+15)));
-  buttons.add(new Button("OR","OR", new PVector(15, buttons.size()*85+15)));
-  buttons.add(new Button("NOR","NOR", new PVector(15, buttons.size()*85+15)));
-  buttons.add(new Button("XOR","XOR", new PVector(15, buttons.size()*85+15)));
-  buttons.add(new Button("XNOR","XNOR", new PVector(15, buttons.size()*85+15)));
-  buttons.add(new Button("INPUT_BUTTON","BUTTON", new PVector(15, buttons.size()*85+15)));
-  buttons.add(new Button("INPUT","INPUT", new PVector(15, buttons.size()*85+15)));
-  buttons.add(new Button("OUTPUT","OUTPUT", new PVector(15, buttons.size()*85+15)));
+  buttons.add(new Button("AND","AND","Data/Textures/gates/and.png", new PVector(15, buttons.size()*85+15)));
+  buttons.add(new Button("NAND","NAND","Data/Textures/gates/nand.png", new PVector(15, buttons.size()*85+15)));
+  buttons.add(new Button("NOT","NOT","Data/Textures/gates/not.png", new PVector(15, buttons.size()*85+15)));
+  buttons.add(new Button("OR","OR","Data/Textures/gates/or.png", new PVector(15, buttons.size()*85+15)));
+  buttons.add(new Button("NOR","NOR","Data/Textures/gates/nor.png", new PVector(15, buttons.size()*85+15)));
+  buttons.add(new Button("XOR","XOR","Data/Textures/gates/xor.png", new PVector(15, buttons.size()*85+15)));
+  buttons.add(new Button("XNOR","XNOR","Data/Textures/gates/xnor.png", new PVector(15, buttons.size()*85+15)));
+  buttons.add(new Button("INPUT_BUTTON","BUTTON","Data/Textures/interface/button.png", new PVector(15, buttons.size()*85+15)));
+  buttons.add(new Button("INPUT","INPUT","Data/Textures/interface/input_false.png", new PVector(15, buttons.size()*85+15)));
+  buttons.add(new Button("OUTPUT","OUTPUT","Data/Textures/interface/output_false.png", new PVector(15, buttons.size()*85+15)));
 
-  images[0] = loadImage("Data/recycle-bin.png");
-  images[1] = loadImage("Data/blueprint.png");
-  images[2] = loadImage("Data/delete-blueprint.png");
-  images[3] = loadImage("Data/lines.png");
-  images[4] = loadImage("Data/resize.png");
-  images[5] = loadImage("Data/copy.png");
-  images[6] = loadImage("Data/paste.png");
+  images[0] = loadImage("Data/UI/recycle-bin.png");
+  images[1] = loadImage("Data/UI/blueprint.png");
+  images[2] = loadImage("Data/UI/delete-blueprint.png");
+  images[3] = loadImage("Data/UI/lines.png");
+  images[4] = loadImage("Data/UI/resize.png");
+  images[5] = loadImage("Data/UI/copy.png");
+  images[6] = loadImage("Data/UI/paste.png");
+  
+  //notif_shape = loadShape("Data/UI/notifications.svg");
+  notifications.add(new Notification("Welcome", new String[]{"Welcome to Logic Circuit Sim"},200,true));
+  
   globalOffset = new PVector(0, 0);
   frameRate(60);
   screenRes = new PVector(width,height);
+  textSize(20);
 }
 
 void pre() {
@@ -128,6 +135,15 @@ void draw() {
     
     for (Gate s : gates) {
       s.show();
+    }
+    
+    for(int i = notifications.size() -1; i >= 0; i--){
+      //shape(notifications.get(i).notification_shape,width-310,height-(110*(i+1)));
+      notifications.get(i).show(new PVector(width-310,height-(110*(i+1))));
+      if(i == 0){
+        notifications.get(0).time --;
+        if(notifications.get(0).time == 0) notifications.remove(0);
+      }
     }
 
     stroke(255);
@@ -235,7 +251,7 @@ void mousePressed() {
       for (Gate s : gates) {
         if((s.hidden == false || s.type == "OUTPUTbp") && s.position.x > -100 && s.position.x < (width+20)/globalScale && s.position.y > -100 && s.position.y < (height+20)/globalScale && outputIndex > -3){
           for (int i = 0; i < s.outputs.size(); i++) {
-            if (PVector.dist(new PVector(mouseX, mouseY), PVector.mult(PVector.add(s.position, s.outputs.get(i)), globalScale)) < (50*globalScale) && editing == null|| editing != null && PVector.dist(new PVector(mouseX, mouseY), PVector.mult(PVector.add(s.position, s.outputs.get(i)), globalScale)) < PVector.dist(new PVector(mouseX, mouseY), PVector.mult(PVector.add(editing.position, editing.outputs.get(i)), globalScale))) {
+            if (PVector.dist(new PVector(mouseX, mouseY), PVector.mult(PVector.add(s.position, s.outputs.get(i)), globalScale)) < 50 && editing == null|| editing != null && PVector.dist(new PVector(mouseX, mouseY), PVector.mult(PVector.add(s.position, s.outputs.get(i)), globalScale)) < PVector.dist(new PVector(mouseX, mouseY), PVector.mult(PVector.add(editing.position, editing.outputs.get(i)), globalScale))) {
               editing = s;
               outputIndex = i;
             }
@@ -267,7 +283,7 @@ void mousePressed() {
         if (pixelInPoly(b.shapes.get(0).points, PVector.sub(new PVector(mouseX, mouseY), b.position))) {
           Gate _new = null;
           globalScale = holder;
-          _new = new Gate(b.name, PVector.div(new PVector(mouseX, mouseY),globalScale));
+          _new = new Gate(b.name, b.texture,PVector.div(new PVector(mouseX, mouseY),globalScale));
           gates.add(_new);
           editing = _new;
           outputIndex = -2;
@@ -290,6 +306,7 @@ void keyPressed(){
       customGates.get(customGates.size()-1).name = customGates.get(customGates.size()-1).name.substring(0,customGates.get(customGates.size()-1).name.length()-1);
     } else if (keyCode == ENTER){
       creatingName = false;
+      notifications.add(new Notification("Blueprint Edit", new String[]{"Blueprint Created", customGates.get(customGates.size()-1).name},100,true));
     }
   } else {
     if(key == '1'){
@@ -301,6 +318,7 @@ void keyPressed(){
       else if(globalLines == "stright") globalLines = "stright spline";
       else if(globalLines == "stright spline") globalLines = "spline";
       else if(globalLines == "spline") globalLines = "l turn line";
+      notifications.add(new Notification("Lines Changed", new String[]{"Changed lines to", globalLines},100,true));
     }  else if (key == '4') {
       outputIndex = -4;
     } else if (key == 3 && keyCode == 67) {
@@ -309,7 +327,7 @@ void keyPressed(){
       outputIndex = -6;
     }
   }
-  println((int)key, keyCode);
+  //println((int)key, keyCode);
   shouldDraw = true;
 }
 
@@ -320,6 +338,7 @@ void mouseReleased() {
       if (customGates.get(i) == editing) {
         if (customGates.get(i).minimized) customGates.get(i).minimize();
         customGates.get(i).delete(false);
+        notifications.add(new Notification("Blueprint Edit", new String[]{"Blueprint Removed", customGates.get(i).name},100,true));
       }
     }
   }
@@ -328,6 +347,7 @@ void mouseReleased() {
     for(int i = customGates.size() -1; i >= 0; i--){
       if (customGates.get(i) == editing) {
         customGates.get(i).minimize();
+        notifications.add(new Notification("Blueprint Edit", new String[]{"Blueprint Minimized", customGates.get(i).name},100,true));
       }
     }
   }
@@ -336,14 +356,13 @@ void mouseReleased() {
     for(int i = customGates.size() -1; i >= 0; i--){
       if (customGates.get(i) == editing) {
         copy = customGates.get(i);
-        println(copy);
+        notifications.add(new Notification("Blueprint Edit", new String[]{"Blueprint Copied", customGates.get(i).name},100,true));
       }
     }
   }
   
   if(outputIndex == -6 && copy != null){
     CustomGate cg = new CustomGate(new Shape(new PVector[]{new PVector(0,0,0),new PVector(0,0),new PVector(0,0), new PVector(0,0)},color(0,90,120,100),false),PVector.div(new PVector(0,0),globalScale),PVector.sub(new PVector(0,0),new PVector(0,0)));
-    println(copy.localGates.size());
     customGates.add(cg);
     customGates.get(customGates.size()-1).position = new PVector(mouseX/globalScale,mouseY/globalScale);
     customGates.get(customGates.size()-1).name = copy.name;
@@ -353,8 +372,11 @@ void mouseReleased() {
     customGates.get(customGates.size()-1).minimized = copy.minimized;
     customGates.get(customGates.size()-1).holderShapes = copy.holderShapes;
     for(Gate g : copy.localGates){ //<>//
-      Gate newGate = new Gate("AND", PVector.div(new PVector(mouseX, mouseY),globalScale));
+      Gate newGate = new Gate(g.type,g.texture_off, PVector.div(new PVector(mouseX, mouseY),globalScale));
       newGate.shapes = g.shapes;
+      newGate.texture_off = g.texture_off;
+      newGate.texture_on = g.texture_on;
+      newGate.size = g.size;
       newGate.outline = g.outline;
       newGate.type = g.type;
       newGate.position = PVector.add(new PVector(mouseX/globalScale,mouseY/globalScale),PVector.sub(g.position,copy.position));
@@ -378,34 +400,29 @@ void mouseReleased() {
         cg.localGates.get(i).connections_out.add(cg.localGates.get(copy.localGates.indexOf(copy.localGates.get(i).connections_out.get(j))));
       }
     }
-    println("Index: " + copy.localGates.indexOf(gates.get(3)));
+    notifications.add(new Notification("Blueprint Edit", new String[]{"Blueprint Pasted", cg.name},100,true));
   }
   
   if(creatingCustom) {
     customPoints[1] = new PVector(mouseX,mouseY);
     creatingCustom = false;
     CustomGate cg = new CustomGate(new Shape(new PVector[]{new PVector(0,0,0),new PVector((customPoints[1].x-customPoints[0].x)/globalScale,0),new PVector((customPoints[1].x-customPoints[0].x)/globalScale,(customPoints[1].y-customPoints[0].y)/globalScale), new PVector(0,(customPoints[1].y-customPoints[0].y)/globalScale)},color(0,90,120,100),false),PVector.div(customPoints[0],globalScale),PVector.sub(customPoints[1],customPoints[0]));
-    println(customPoints[0].x/globalScale,customPoints[0].y/globalScale);
-    println(customPoints[1].x/globalScale,customPoints[1].y/globalScale);
     for(Gate g : gates){
       if((g.hidden == false || g.type == "INPUTbp" || g.type == "OUTPUTbp") && g.position.x >= min(customPoints[0].x,customPoints[1].x)/globalScale && g.position.x <= max(customPoints[0].x,customPoints[1].x)/globalScale && g.position.y >= min(customPoints[0].y,customPoints[1].y)/globalScale && g.position.y <= max(customPoints[0].y,customPoints[1].y)/globalScale){
         cg.localGates.add(g);
-        println(g.position,g.type);
-      } else {
-        println(g.position);
       }
     }
     Boolean inputFound = false, outputFound = false;
     for(Gate g : cg.localGates){
-      if (g.type == "INPUT" || g.inputsNullCheck() && g.connections_out.size() != 0) inputFound = true;
-      if (g.type == "OUTPUT" || g.connections_out.size() == 0 && !g.inputsNullCheck()) outputFound = true;
+      if (g.type == "INPUT" || g.inputsNullCheck() && g.connections_out.size() != 0 && g.inputs.size() > 0) inputFound = true;
+      if (g.type == "OUTPUT" || g.connections_out.size() == 0 && !g.inputsNullCheck() && g.outputs.size() > 0) outputFound = true;
     }
     if(inputFound && outputFound) {
       cg.setupGate();
       customGates.add(cg);
       creatingName = true;
     } else {
-      println("failed to create custom gate");
+      notifications.add(new Notification("Blueprint Edit", new String[]{"Blueprint Assembly Failed", "need 1 input and 1 output"},200,false));
     }
     customPoints = new PVector[2];
   } else {
@@ -418,7 +435,7 @@ void mouseReleased() {
           if(s != editing){
             for (int i = 0; i < s.inputs.size(); i++) {
               float calcDistance = PVector.dist(new PVector(mouseX, mouseY), PVector.mult(PVector.add(s.position, s.inputs.get(i)), globalScale));
-              if (calcDistance < (50*globalScale) && calcDistance < closestDist) {
+              if (calcDistance < 50 && calcDistance < closestDist) {
                 closestDist = calcDistance;
                 bestIndex = i;
                 bestGate = s;
@@ -528,6 +545,7 @@ void mouseClicked() {
     else if(globalLines == "stright") globalLines = "stright spline";
     else if(globalLines == "stright spline") globalLines = "spline";
     else if(globalLines == "spline") globalLines = "l turn line";
+    notifications.add(new Notification("Lines Changed", new String[]{"Changed lines to", globalLines},100,true));
   }
   if(mouseX >= 240 && mouseX <= 270 && mouseY >= 5 && mouseY <= 45) outputIndex = -4;
   if(mouseX >= 290 && mouseX <= 330 && mouseY >= 5 && mouseY <= 45) outputIndex = -5;

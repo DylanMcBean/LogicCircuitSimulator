@@ -7,7 +7,7 @@ class CustomGate extends Gate{
   String name = "enter name";
   
   CustomGate(Shape _outline, PVector _position, PVector size){
-    super("custom",_position);
+    super("custom",null,_position);
     this.shapes.add(_outline);
     this.position = _position;
     this.blueprintSize = size;
@@ -37,12 +37,14 @@ class CustomGate extends Gate{
         g.inputs.add(new PVector(0, 10));
         g.position = new PVector(this.position.x,g.position.y);
         g.connections_in = new Connection[1];
+        g.size = new PVector(20,20);
       } else if(g.type == "OUTPUT"){
         g.type = "OUTPUTbp";
         g.position = new PVector(this.position.x + (blueprintSize.x)/globalScale - 20,g.position.y);
         g.shapes = new ArrayList<Shape>();
         g.shapes.add(new Shape(new PVector[]{new PVector(0, 8), new PVector(0, 12),new PVector(20,12), new PVector(20, 8)}, color(231,102,140), false));
         g.outputs.add(new PVector(20, 10));
+        g.size = new PVector(20,20);
       } else if(g.inputsNullCheck() && g.connections_out.size() != 0){
         g.position = new PVector(this.position.x-g.inputs.get(0).x,g.position.y);
       } else if(g.connections_out.size() == 0 && !g.inputsNullCheck()){

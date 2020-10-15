@@ -2,7 +2,7 @@ class Gate {
   ArrayList<Shape> shapes = new ArrayList<Shape>();
   boolean outline;
   String type;
-  PVector position;
+  PVector position, size;
   ArrayList<PVector> inputs = new ArrayList<PVector>();
   ArrayList<PVector> outputs = new ArrayList<PVector>();
   Connection[] connections_in;
@@ -10,12 +10,14 @@ class Gate {
   Boolean powered = false, hidden = false;
   int poweredFramesMax = 0, poweredFramesLeft = 0;
   Boolean shouldCalculatePowered = false;
+  PImage texture_off, texture_on;
 
-  Gate(String name, PVector pos) {
+  Gate(String name, PImage texture,PVector pos) {
     this.type = name;
     this.position = pos;
     getShape(name);
     connections_in = new Connection[inputs.size()];
+    this.texture_off = texture;
   }
 
 
@@ -43,20 +45,22 @@ class Gate {
       for (Shape shape : shapes) {
         if (outline) stroke(0);
         else noStroke();
-        if (type.matches("OUTPUT|INPUT|INPUT_BUTTON") && powered) {
-          stroke(0, 150, 80);
-          strokeWeight(2*globalScale);
-          fill(0, 200, 100);
-        } else {
-          fill(shape.fill);
-        }
+        //if (type.matches("OUTPUT|INPUT|INPUT_BUTTON") && powered) {
+        //  stroke(0, 150, 80);
+        //  strokeWeight(2*globalScale);
+        //  fill(0, 200, 100);
+        //} else {
+        //  fill(shape.fill);
+        //}
 
         if(!this.hidden){
+          fill(0,0);
           beginShape();
           for (PVector point : shape.points) {
             vertex(this.position.x*globalScale + point.x*globalScale, this.position.y*globalScale + point.y*globalScale);
           }
           endShape(CLOSE);
+          image((this.powered && this.texture_on != null) ? this.texture_on : this.texture_off,this.position.x*globalScale,this.position.y*globalScale,this.size.x*globalScale,this.size.y*globalScale);
           updates[0] += 1;
           updates[3] += 1;
         }
@@ -129,61 +133,73 @@ class Gate {
       inputs.add(new PVector(0, 10));
       inputs.add(new PVector(0, 30));
       outputs.add(new PVector(40, 20));
+      this.size = new PVector(40,40);
       break;
     case "NAND":
       this.shapes.add(new Shape(new PVector[]{new PVector(0, 0), new PVector(20, 0), new PVector(30, 5), new PVector(40, 20), new PVector(30, 35), new PVector(20, 40), new PVector(0, 40)}, color(64,138,249), false));
       this.shapes.add(new Shape(new PVector[]{new PVector(40, 20), new PVector(45, 15), new PVector(50, 20), new PVector(45, 25)}, color(64,138,249), false));
       inputs.add(new PVector(0, 10));
       inputs.add(new PVector(0, 30));
-      outputs.add(new PVector(50, 20));
+      outputs.add(new PVector(42, 20));
+      this.size = new PVector(40,40);
       break;
     case "NOT":
       this.shapes.add(new Shape(new PVector[]{new PVector(0, 0), new PVector(40, 20), new PVector(0, 40)}, color(64,138,249), false));
       this.shapes.add(new Shape(new PVector[]{new PVector(40, 20), new PVector(45, 15), new PVector(50, 20), new PVector(45, 25)}, color(64,138,249), false));
       inputs.add(new PVector(0, 20));
-      outputs.add(new PVector(50, 20));
+      outputs.add(new PVector(42, 20));
+      this.size = new PVector(40,40);
       break;
     case "OR":
       this.shapes.add(new Shape(new PVector[]{new PVector(0, 0), new PVector(20, 5), new PVector(30, 10), new PVector(40, 20), new PVector(30, 30), new PVector(20, 35), new PVector(0, 40), new PVector(5, 30), new PVector(5, 10)}, color(64,138,249), false));
       inputs.add(new PVector(5, 10));
       inputs.add(new PVector(5, 30));
       outputs.add(new PVector(40, 20));
+      this.size = new PVector(40,40);
       break;
     case "NOR":
       this.shapes.add(new Shape(new PVector[]{new PVector(0, 0), new PVector(20, 5), new PVector(30, 10), new PVector(40, 20), new PVector(30, 30), new PVector(20, 35), new PVector(0, 40), new PVector(5, 30), new PVector(5, 10)}, color(64,138,249), false));
       this.shapes.add(new Shape(new PVector[]{new PVector(40, 20), new PVector(45, 15), new PVector(50, 20), new PVector(45, 25)}, color(64,138,249), false));
       inputs.add(new PVector(5, 10));
       inputs.add(new PVector(5, 30));
-      outputs.add(new PVector(50, 20));
+      outputs.add(new PVector(42, 20));
+      this.size = new PVector(40,40);
       break;
     case "XOR":
       this.shapes.add(new Shape(new PVector[]{new PVector(0, 0), new PVector(20, 5), new PVector(30, 10), new PVector(40, 20), new PVector(30, 30), new PVector(20, 35), new PVector(0, 40), new PVector(5, 30), new PVector(5, 10)}, color(64,138,249), false));
       this.shapes.add(new Shape(new PVector[]{new PVector(-5, 0), new PVector(0, 10), new PVector(0, 30), new PVector(-5, 40), new PVector(-2, 30), new PVector(-2, 10)}, color(64,138,249), false));
-      inputs.add(new PVector(-5, 10));
-      inputs.add(new PVector(-5, 30));
-      outputs.add(new PVector(40, 20));
+      inputs.add(new PVector(1, 10));
+      inputs.add(new PVector(1, 30));
+      outputs.add(new PVector(42, 20));
+      this.size = new PVector(40,40);
       break;
     case "XNOR":
       this.shapes.add(new Shape(new PVector[]{new PVector(0, 0), new PVector(20, 5), new PVector(30, 10), new PVector(40, 20), new PVector(30, 30), new PVector(20, 35), new PVector(0, 40), new PVector(5, 30), new PVector(5, 10)}, color(64,138,249), false));
       this.shapes.add(new Shape(new PVector[]{new PVector(-5, 0), new PVector(0, 10), new PVector(0, 30), new PVector(-5, 40), new PVector(-2, 30), new PVector(-2, 10)}, color(64,138,249), false));
       this.shapes.add(new Shape(new PVector[]{new PVector(40, 20), new PVector(45, 15), new PVector(50, 20), new PVector(45, 25)}, color(64,138,249), false));
-      inputs.add(new PVector(-5, 10));
-      inputs.add(new PVector(-5, 30));
-      outputs.add(new PVector(50, 20));
+      inputs.add(new PVector(1, 10));
+      inputs.add(new PVector(1, 30));
+      outputs.add(new PVector(42, 20));
+      this.size = new PVector(40,40);
       break;
     case "INPUT":
       this.shapes.add(new Shape(new PVector[]{new PVector(0, 0), new PVector(0, 20),new PVector(20,20), new PVector(20, 0)}, color(231,102,140), false));
       outputs.add(new PVector(20, 10));
+      this.size = new PVector(20,20);
+      this.texture_on = loadImage("Data/Textures/interface/input_true.png");
       break;
     case "INPUT_BUTTON":
       this.shapes.add(new Shape(new PVector[]{new PVector(0, 0), new PVector(0, 20),new PVector(20,20), new PVector(20, 0)}, color(231,102,140), false));
       this.shapes.add(new Shape(new PVector[]{new PVector(13,17),new PVector(15,16),new PVector(16,15),new PVector(17,13),new PVector(17,6),new PVector(16,4),new PVector(15,3),new PVector(13,2),new PVector(6,2),new PVector(4,3),new PVector(3,4),new PVector(2,6),new PVector(2,13),new PVector(3,15),new PVector(4,16),new PVector(6,17)}, color(231,231,102), false));
       outputs.add(new PVector(20, 10));
       poweredFramesMax = 60;
+      this.size = new PVector(20,20);
       break;
     case "OUTPUT":
       this.shapes.add(new Shape(new PVector[]{new PVector(0, 10), new PVector(20, 0), new PVector(20, 20)}, color(231,102,140), false));
       inputs.add(new PVector(0, 10));
+      this.size = new PVector(20,20);
+      this.texture_on = loadImage("Data/Textures/interface/output_true.png");
       break;
     }
   }

@@ -2,18 +2,20 @@ class Button{
   ArrayList<Shape> shapes = new ArrayList<Shape>();
   String name, title;
   PVector position;
+  PImage texture;
   
-  Button(String _name, String _title, PVector pos){
+  Button(String _name, String _title,String texture, PVector pos){
     this.name = _name;
     this.title = _title;
     this.position = pos;
+    this.texture = loadImage(texture);
     
     getShape(_name);
   }
   
   void show() {
     for (Shape shape : shapes) {
-      fill(shape.fill); 
+      noFill();//fill(shape.fill);
       noStroke();
       beginShape();
       for (PVector point : shape.points) {
@@ -23,6 +25,7 @@ class Button{
       updates[0] += 1;
       updates[3] += 1;
     }
+    image(this.texture,this.position.x,this.position.y,40,40);
     fill(0);
     textSize(14);
     textAlign(CENTER,CENTER);
