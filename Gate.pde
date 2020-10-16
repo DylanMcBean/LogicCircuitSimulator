@@ -47,14 +47,7 @@ class Gate {
       for (Shape shape : shapes) {
         if (outline) stroke(0);
         else noStroke();
-        //if (type.matches("OUTPUT|INPUT|INPUT_BUTTON") && powered) {
-        //  stroke(0, 150, 80);
-        //  strokeWeight(2*globalScale);
-        //  fill(0, 200, 100);
-        //} else {
-        //  fill(shape.fill);
-        //}
-
+        
         if(!this.hidden){
           fill(0,0);
           beginShape();
@@ -62,7 +55,13 @@ class Gate {
             vertex(this.position.x*globalScale + point.x*globalScale, this.position.y*globalScale + point.y*globalScale);
           }
           endShape(CLOSE);
+          
           image((this.powered && this.texture_on.size() == 1) ? this.texture_on.get(0) : this.texture_off,this.position.x*globalScale,this.position.y*globalScale,this.size.x*globalScale,this.size.y*globalScale);
+          if(this.type == "OUTPUT_HEX_DISPLAY"){
+            for(int i = 0; i < connections_in.length; i++){
+              if(connections_in[i] != null && connections_in[i].connector.powered) image(this.texture_on.get(i),this.position.x*globalScale,this.position.y*globalScale,this.size.x*globalScale,this.size.y*globalScale);
+            }
+          }
           updates[0] += 1;
           updates[3] += 1;
         }
@@ -104,6 +103,11 @@ class Gate {
       textAlign(CENTER,CENTER);
       fill(0);
       text(powered ? "1" : "0",(this.position.x+10)*globalScale,(this.position.y+10)*globalScale);
+    } else if (type == "INPUT_CLOCK"){
+      textSize(12*globalScale);
+      textAlign(CENTER,CENTER);
+      fill(0);
+      text(this.poweredFramesMax,(this.position.x+20)*globalScale,(this.position.y+20)*globalScale);
     }
     if(this.shouldCalculatePowered) calculatePowered();
     this.shouldCalculatePowered = false;
@@ -119,11 +123,16 @@ class Gate {
   }
   
   void powerDown(){
+    println(this.type);
     if(this.poweredFramesMax > 0) {
       if(this.poweredFramesLeft > 0) this.poweredFramesLeft --;
-      if(this.poweredFramesLeft == 0 && this.powered){
+      if(this.poweredFramesLeft == 0 && this.powered && this.type != "INPUT_CLOCK"){
         this.powered = false;
         this.shouldCalculatePowered = true;
+      } else if (this.poweredFramesLeft == 0 && this.type == "INPUT_CLOCK"){
+        this.powered = !this.powered;
+        this.shouldCalculatePowered = true;
+        this.poweredFramesLeft = poweredFramesMax;
       }
     }
   }
@@ -196,6 +205,13 @@ class Gate {
       outputs.add(new PVector(20, 10));
       poweredFramesMax = 60;
       this.size = new PVector(20,20);
+      break;
+    case "INPUT_CLOCK":
+      println("hey");
+      this.shapes.add(new Shape(new PVector[]{new PVector(0, 0), new PVector(0, 40),new PVector(40,40), new PVector(40, 0)}, color(231,102,140), false));
+      outputs.add(new PVector(40, 20));
+      poweredFramesMax = 1;
+      this.size = new PVector(40,40);
       break;
     case "OUTPUT":
       this.shapes.add(new Shape(new PVector[]{new PVector(0, 10), new PVector(20, 0), new PVector(20, 20)}, color(231,102,140), false));

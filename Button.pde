@@ -71,6 +71,9 @@ class Button {
       this.shapes.add(new Shape(new PVector[]{new PVector(0, 0), new PVector(0, 40), new PVector(40, 40), new PVector(40, 0)}, color(231, 102, 140), false));
       this.shapes.add(new Shape(new PVector[]{new PVector(26, 34), new PVector(30, 32), new PVector(32, 30), new PVector(34, 16), new PVector(34, 12), new PVector(32, 8), new PVector(30, 6), new PVector(26, 4), new PVector(12, 4), new PVector(8, 6), new PVector(6, 8), new PVector(4, 12), new PVector(4, 26), new PVector(6, 30), new PVector(8, 32), new PVector(12, 34)}, color(231, 231, 102), false));
       break;
+    case "INPUT_CLOCK":
+      this.shapes.add(new Shape(new PVector[]{new PVector(0, 0), new PVector(0, 40), new PVector(40, 40), new PVector(40, 0)}, color(231, 102, 140), false));
+      break;
     case "OUTPUT":
       this.shapes.add(new Shape(new PVector[]{new PVector(0, 20), new PVector(40, 0), new PVector(40, 40)}, color(231, 102, 140), false));
       break;

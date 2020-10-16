@@ -32,9 +32,10 @@ void setup() {
   buttons.add(new Button("XOR","XOR","Data/Textures/gates/xor.png", new PVector(15, buttons.size()*85+15), new PVector(40,40)));
   buttons.add(new Button("XNOR","XNOR","Data/Textures/gates/xnor.png", new PVector(15, buttons.size()*85+15), new PVector(40,40)));
   buttons.add(new Button("INPUT_BUTTON","BUTTON","Data/Textures/interface/button.png", new PVector(15, buttons.size()*85+15), new PVector(40,40)));
+  buttons.add(new Button("INPUT_CLOCK","CLOCK","Data/Textures/interface/button.png", new PVector(15, buttons.size()*85+15), new PVector(40,40)));
   buttons.add(new Button("INPUT","INPUT","Data/Textures/interface/input_false.png", new PVector(15, buttons.size()*85+15), new PVector(40,40)));
   buttons.add(new Button("OUTPUT","OUTPUT","Data/Textures/interface/output_false.png", new PVector(15, buttons.size()*85+15), new PVector(40,40)));
-  buttons.add(new Button("OUTPUT_HEX_DISPLAY","HEX DISP","Data/Textures/interface/7Segment/off.png", new PVector(15, buttons.size()*85+15), new PVector(20,40)));
+  buttons.add(new Button("OUTPUT_HEX_DISPLAY","7 SEG DISP","Data/Textures/interface/7Segment/off.png", new PVector(15, buttons.size()*85+15), new PVector(20,40)));
 
   images[0] = loadImage("Data/UI/recycle-bin.png");
   images[1] = loadImage("Data/UI/blueprint.png");
@@ -252,9 +253,11 @@ void mousePressed() {
       for (Gate s : gates) {
         if((s.hidden == false || s.type == "OUTPUTbp" || s.blueprint_output) && s.position.x > -100 && s.position.x < (width+20)/globalScale && s.position.y > -100 && s.position.y < (height+20)/globalScale && outputIndex > -3){
           for (int i = 0; i < s.outputs.size(); i++) {
-            if (PVector.dist(new PVector(mouseX, mouseY), PVector.mult(PVector.add(s.position, s.outputs.get(i)), globalScale)) < 50 && editing == null|| editing != null && PVector.dist(new PVector(mouseX, mouseY), PVector.mult(PVector.add(s.position, s.outputs.get(i)), globalScale)) < PVector.dist(new PVector(mouseX, mouseY), PVector.mult(PVector.add(editing.position, editing.outputs.get(i)), globalScale))) {
-              editing = s;
-              outputIndex = i;
+            if(editing != null && editing.outputs.size() > 0 || editing == null){
+              if (PVector.dist(new PVector(mouseX, mouseY), PVector.mult(PVector.add(s.position, s.outputs.get(i)), globalScale)) < 50 && editing == null || editing != null && PVector.dist(new PVector(mouseX, mouseY), PVector.mult(PVector.add(s.position, s.outputs.get(i)), globalScale)) < PVector.dist(new PVector(mouseX, mouseY), PVector.mult(PVector.add(editing.position, editing.outputs.get(i)), globalScale))) {
+                editing = s;
+                outputIndex = i;
+              }
             }
           }
           if (s.hidden == false && pixelInPoly(s.shapes.get(0).points, PVector.sub(new PVector(mouseX, mouseY), PVector.mult(s.position, globalScale))) && outputIndex > -3) {
@@ -281,7 +284,7 @@ void mousePressed() {
       float holder = globalScale;
       globalScale = 1;
       for ( Button b : buttons) {
-        if (pixelInPoly(b.shapes.get(0).points, PVector.sub(new PVector(mouseX, mouseY), b.position))) { //<>//
+        if (pixelInPoly(b.shapes.get(0).points, PVector.sub(new PVector(mouseX, mouseY), b.position))) {
           Gate _new = null;
           globalScale = holder;
           _new = new Gate(b.name, b.texture,PVector.div(new PVector(mouseX, mouseY),globalScale));
@@ -338,8 +341,8 @@ void mouseReleased() {
     for(int i = customGates.size() -1; i >= 0; i--){
       if (customGates.get(i) == editing) {
         if (customGates.get(i).minimized) customGates.get(i).minimize();
-        customGates.get(i).delete(false);
         notifications.add(new Notification("Blueprint Edit", new String[]{"Blueprint Removed", customGates.get(i).name},100,true));
+        customGates.get(i).delete(false);
       }
     }
   }
@@ -540,6 +543,12 @@ void mouseClicked() {
         s.powered = !s.powered;
         s.calculatePowered();
         s.poweredFramesLeft = s.poweredFramesMax;
+      } else if (pixelInPoly(s.shapes.get(0).points, PVector.sub(new PVector(mouseX, mouseY), PVector.mult(s.position, globalScale))) && s.type == "INPUT_CLOCK") {
+        s.poweredFramesLeft = 0;
+        s.poweredFramesMax *= 2;
+        if(s.poweredFramesMax == 512){
+          s.poweredFramesMax = 1;
+        }
       }
     }
   }
