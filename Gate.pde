@@ -8,9 +8,11 @@ class Gate {
   Connection[] connections_in;
   ArrayList<Gate> connections_out = new ArrayList<Gate>();
   Boolean powered = false, hidden = false;
+  Boolean[] multi_powered;
   int poweredFramesMax = 0, poweredFramesLeft = 0;
-  Boolean shouldCalculatePowered = false;
-  PImage texture_off, texture_on;
+  Boolean shouldCalculatePowered = false, blueprint_input = false, blueprint_output = false;
+  PImage texture_off;
+  ArrayList<PImage> texture_on = new ArrayList<PImage>();
 
   Gate(String name, PImage texture,PVector pos) {
     this.type = name;
@@ -21,10 +23,10 @@ class Gate {
   }
 
 
-  void show() {
+  void show(){
     //Show connecting lines
     for (int i = 0; i < connections_in.length; i++) {
-      if ((this.hidden == false || this.type=="INPUTbp") && connections_in[i] != null && (this.position.x > -100 && this.position.x < (width+20)/globalScale && this.position.y > -100 && this.position.y < (height+20)/globalScale || connections_in[i].connector.position.x > -100 && connections_in[i].connector.position.x < (width+20)/globalScale && connections_in[i].connector.position.y > -100 && connections_in[i].connector.position.y < (height+20)/globalScale)) {
+      if ((this.hidden == false || this.type=="INPUTbp" || this.blueprint_input == true) && connections_in[i] != null && (this.position.x > -100 && this.position.x < (width+20)/globalScale && this.position.y > -100 && this.position.y < (height+20)/globalScale || connections_in[i].connector.position.x > -100 && connections_in[i].connector.position.x < (width+20)/globalScale && connections_in[i].connector.position.y > -100 && connections_in[i].connector.position.y < (height+20)/globalScale)) {
         if (connections_in[i].connector.powered) {
           stroke(3, 218, 100);
         } else {
@@ -60,7 +62,7 @@ class Gate {
             vertex(this.position.x*globalScale + point.x*globalScale, this.position.y*globalScale + point.y*globalScale);
           }
           endShape(CLOSE);
-          image((this.powered && this.texture_on != null) ? this.texture_on : this.texture_off,this.position.x*globalScale,this.position.y*globalScale,this.size.x*globalScale,this.size.y*globalScale);
+          image((this.powered && this.texture_on.size() == 1) ? this.texture_on.get(0) : this.texture_off,this.position.x*globalScale,this.position.y*globalScale,this.size.x*globalScale,this.size.y*globalScale);
           updates[0] += 1;
           updates[3] += 1;
         }
@@ -73,7 +75,7 @@ class Gate {
       //Show inputs and output connectors
       fill(255);
       for (int i = 0; i < inputs.size(); i ++) {
-        if(!hidden || this.type == "INPUTbp") {
+        if(!hidden || this.type == "INPUTbp" || this.blueprint_input == true) {
           fill(200, 200, 80);
           if (connections_in[i] == null) {
             fill(255, 255, 10);
@@ -88,7 +90,7 @@ class Gate {
       }
 
       for (PVector output : outputs) {
-        if(!hidden || this.type == "OUTPUTbp") {
+        if(!hidden || this.type == "OUTPUTbp" || blueprint_output == true) {
           fill(120, 200, 180);
           ellipse((this.position.x+output.x)*globalScale, (this.position.y+output.y)*globalScale, 5*globalScale, 5*globalScale);
           updates[0] += 1;
@@ -186,7 +188,7 @@ class Gate {
       this.shapes.add(new Shape(new PVector[]{new PVector(0, 0), new PVector(0, 20),new PVector(20,20), new PVector(20, 0)}, color(231,102,140), false));
       outputs.add(new PVector(20, 10));
       this.size = new PVector(20,20);
-      this.texture_on = loadImage("Data/Textures/interface/input_true.png");
+      this.texture_on.add(loadImage("Data/Textures/interface/input_true.png"));
       break;
     case "INPUT_BUTTON":
       this.shapes.add(new Shape(new PVector[]{new PVector(0, 0), new PVector(0, 20),new PVector(20,20), new PVector(20, 0)}, color(231,102,140), false));
@@ -199,7 +201,27 @@ class Gate {
       this.shapes.add(new Shape(new PVector[]{new PVector(0, 10), new PVector(20, 0), new PVector(20, 20)}, color(231,102,140), false));
       inputs.add(new PVector(0, 10));
       this.size = new PVector(20,20);
-      this.texture_on = loadImage("Data/Textures/interface/output_true.png");
+      this.texture_on.add(loadImage("Data/Textures/interface/output_true.png"));
+      break;
+    case "OUTPUT_HEX_DISPLAY":
+      this.shapes.add(new Shape(new PVector[]{new PVector(0, 0), new PVector(40, 0), new PVector(40, 80), new PVector(0,80)}, color(231,102,140), false));
+      inputs.add(new PVector(0, 10));
+      inputs.add(new PVector(0, 18.571));
+      inputs.add(new PVector(0, 27.143));
+      inputs.add(new PVector(0, 35.714));
+      inputs.add(new PVector(0, 44.286));
+      inputs.add(new PVector(0, 52.857));
+      inputs.add(new PVector(0, 61.428));
+      inputs.add(new PVector(0, 70));
+      this.size = new PVector(40,80);
+      this.texture_on.add(loadImage("Data/Textures/interface/7Segment/a.png"));
+      this.texture_on.add(loadImage("Data/Textures/interface/7Segment/b.png"));
+      this.texture_on.add(loadImage("Data/Textures/interface/7Segment/c.png"));
+      this.texture_on.add(loadImage("Data/Textures/interface/7Segment/d.png"));
+      this.texture_on.add(loadImage("Data/Textures/interface/7Segment/e.png"));
+      this.texture_on.add(loadImage("Data/Textures/interface/7Segment/f.png"));
+      this.texture_on.add(loadImage("Data/Textures/interface/7Segment/g.png"));
+      this.texture_on.add(loadImage("Data/Textures/interface/7Segment/dp.png"));
       break;
     }
   }
@@ -246,6 +268,12 @@ class Gate {
     case "OUTPUT":
       if (connections_in[0] != null && connections_in[0].connector.powered) this.powered = true;
       else this.powered = false;
+      break;
+    case "OUTPUT_HEX_DISPLAY":
+      this.powered = false;
+      for(int i = 0; i < connections_in.length; i ++) {
+        if (connections_in[i] != null && connections_in[i].connector.powered) this.powered = true;
+      }
       break;
     case "INPUTbp":
       if (connections_in[0] != null && connections_in[0].connector.powered) this.powered = true;

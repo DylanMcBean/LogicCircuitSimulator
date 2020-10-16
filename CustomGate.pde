@@ -47,8 +47,10 @@ class CustomGate extends Gate{
         g.size = new PVector(20,20);
       } else if(g.inputsNullCheck() && g.connections_out.size() != 0){
         g.position = new PVector(this.position.x-g.inputs.get(0).x,g.position.y);
+        g.blueprint_input = true;
       } else if(g.connections_out.size() == 0 && !g.inputsNullCheck()){
         g.position = new PVector(this.position.x + (blueprintSize.x)/globalScale - g.outputs.get(0).x,g.position.y);
+        g.blueprint_output = true;
       }
     }
   }
@@ -63,17 +65,18 @@ class CustomGate extends Gate{
      this.shapes = new ArrayList<Shape>();
      this.shapes.add(new Shape(new PVector[]{new PVector(0, 0), new PVector(0, 50),new PVector(50,50), new PVector(50, 0)}, color(0,90,120,100), false));
      for(Gate g : localGates){
-       if (g.type == "INPUTbp" || g.type == "OUTPUTbp"){
-         g.position.x = map(g.position.x,this.position.x,this.position.x + blueprintSize.x-20,this.position.x,this.position.x+30);
-         g.position.y = map(g.position.y,this.position.y,this.position.y+this.blueprintSize.y-12,this.position.y,this.position.y+38);
+       if (g.type == "INPUTbp" || g.type == "OUTPUTbp" || g.blueprint_input || g.blueprint_output){
+         println(g.type,g.size);
+         g.position.x = map(g.position.x,this.position.x,this.position.x + blueprintSize.x-g.size.x,this.position.x,this.position.x+(50-g.size.x));
+         g.position.y = map(g.position.y,this.position.y,this.position.y+this.blueprintSize.y-g.size.y,this.position.y,this.position.y+(50-g.size.y));
        }
      }
    } else if(!this.minimized){
      this.shapes = holderShapes;
      for(Gate g : localGates){
-       if (g.type == "INPUTbp" || g.type == "OUTPUTbp"){
-         g.position.x = map(g.position.x,this.position.x,this.position.x+30,this.position.x,this.position.x + blueprintSize.x-20);
-         g.position.y = map(g.position.y,this.position.y,this.position.y+38,this.position.y,this.position.y+this.blueprintSize.y-12);
+       if (g.type == "INPUTbp" || g.type == "OUTPUTbp" || g.blueprint_input || g.blueprint_output){
+         g.position.x = map(g.position.x,this.position.x,this.position.x+(50-g.size.x),this.position.x,this.position.x + blueprintSize.x-g.size.x);
+         g.position.y = map(g.position.y,this.position.y,this.position.y+(50-g.size.y),this.position.y,this.position.y+this.blueprintSize.y-g.size.y);
        }
      }
    }
@@ -101,6 +104,7 @@ class CustomGate extends Gate{
         g.shapes.add(new Shape(new PVector[]{new PVector(0, 10), new PVector(20, 0), new PVector(20, 20)}, color(231,102,140), false));
         g.outputs = new ArrayList<PVector>();
       }
+      g.blueprint_input = g.blueprint_output = false;
     }
     customGates.remove(this);
   }

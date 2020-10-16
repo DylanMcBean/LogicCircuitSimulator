@@ -24,16 +24,17 @@ void setup() {
   surface.setResizable(true);
   registerMethod("pre", this);
   
-  buttons.add(new Button("AND","AND","Data/Textures/gates/and.png", new PVector(15, buttons.size()*85+15)));
-  buttons.add(new Button("NAND","NAND","Data/Textures/gates/nand.png", new PVector(15, buttons.size()*85+15)));
-  buttons.add(new Button("NOT","NOT","Data/Textures/gates/not.png", new PVector(15, buttons.size()*85+15)));
-  buttons.add(new Button("OR","OR","Data/Textures/gates/or.png", new PVector(15, buttons.size()*85+15)));
-  buttons.add(new Button("NOR","NOR","Data/Textures/gates/nor.png", new PVector(15, buttons.size()*85+15)));
-  buttons.add(new Button("XOR","XOR","Data/Textures/gates/xor.png", new PVector(15, buttons.size()*85+15)));
-  buttons.add(new Button("XNOR","XNOR","Data/Textures/gates/xnor.png", new PVector(15, buttons.size()*85+15)));
-  buttons.add(new Button("INPUT_BUTTON","BUTTON","Data/Textures/interface/button.png", new PVector(15, buttons.size()*85+15)));
-  buttons.add(new Button("INPUT","INPUT","Data/Textures/interface/input_false.png", new PVector(15, buttons.size()*85+15)));
-  buttons.add(new Button("OUTPUT","OUTPUT","Data/Textures/interface/output_false.png", new PVector(15, buttons.size()*85+15)));
+  buttons.add(new Button("AND","AND","Data/Textures/gates/and.png", new PVector(15, buttons.size()*85+15), new PVector(40,40)));
+  buttons.add(new Button("NAND","NAND","Data/Textures/gates/nand.png", new PVector(15, buttons.size()*85+15), new PVector(40,40)));
+  buttons.add(new Button("NOT","NOT","Data/Textures/gates/not.png", new PVector(15, buttons.size()*85+15), new PVector(40,40)));
+  buttons.add(new Button("OR","OR","Data/Textures/gates/or.png", new PVector(15, buttons.size()*85+15), new PVector(40,40)));
+  buttons.add(new Button("NOR","NOR","Data/Textures/gates/nor.png", new PVector(15, buttons.size()*85+15), new PVector(40,40)));
+  buttons.add(new Button("XOR","XOR","Data/Textures/gates/xor.png", new PVector(15, buttons.size()*85+15), new PVector(40,40)));
+  buttons.add(new Button("XNOR","XNOR","Data/Textures/gates/xnor.png", new PVector(15, buttons.size()*85+15), new PVector(40,40)));
+  buttons.add(new Button("INPUT_BUTTON","BUTTON","Data/Textures/interface/button.png", new PVector(15, buttons.size()*85+15), new PVector(40,40)));
+  buttons.add(new Button("INPUT","INPUT","Data/Textures/interface/input_false.png", new PVector(15, buttons.size()*85+15), new PVector(40,40)));
+  buttons.add(new Button("OUTPUT","OUTPUT","Data/Textures/interface/output_false.png", new PVector(15, buttons.size()*85+15), new PVector(40,40)));
+  buttons.add(new Button("OUTPUT_HEX_DISPLAY","HEX DISP","Data/Textures/interface/7Segment/off.png", new PVector(15, buttons.size()*85+15), new PVector(20,40)));
 
   images[0] = loadImage("Data/UI/recycle-bin.png");
   images[1] = loadImage("Data/UI/blueprint.png");
@@ -249,7 +250,7 @@ void mousePressed() {
   } else {
     if (mouseX > 80) {
       for (Gate s : gates) {
-        if((s.hidden == false || s.type == "OUTPUTbp") && s.position.x > -100 && s.position.x < (width+20)/globalScale && s.position.y > -100 && s.position.y < (height+20)/globalScale && outputIndex > -3){
+        if((s.hidden == false || s.type == "OUTPUTbp" || s.blueprint_output) && s.position.x > -100 && s.position.x < (width+20)/globalScale && s.position.y > -100 && s.position.y < (height+20)/globalScale && outputIndex > -3){
           for (int i = 0; i < s.outputs.size(); i++) {
             if (PVector.dist(new PVector(mouseX, mouseY), PVector.mult(PVector.add(s.position, s.outputs.get(i)), globalScale)) < 50 && editing == null|| editing != null && PVector.dist(new PVector(mouseX, mouseY), PVector.mult(PVector.add(s.position, s.outputs.get(i)), globalScale)) < PVector.dist(new PVector(mouseX, mouseY), PVector.mult(PVector.add(editing.position, editing.outputs.get(i)), globalScale))) {
               editing = s;
@@ -280,7 +281,7 @@ void mousePressed() {
       float holder = globalScale;
       globalScale = 1;
       for ( Button b : buttons) {
-        if (pixelInPoly(b.shapes.get(0).points, PVector.sub(new PVector(mouseX, mouseY), b.position))) {
+        if (pixelInPoly(b.shapes.get(0).points, PVector.sub(new PVector(mouseX, mouseY), b.position))) { //<>//
           Gate _new = null;
           globalScale = holder;
           _new = new Gate(b.name, b.texture,PVector.div(new PVector(mouseX, mouseY),globalScale));
@@ -376,6 +377,8 @@ void mouseReleased() {
       newGate.shapes = g.shapes;
       newGate.texture_off = g.texture_off;
       newGate.texture_on = g.texture_on;
+      newGate.blueprint_input = g.blueprint_input;
+      newGate.blueprint_output = g.blueprint_output;
       newGate.size = g.size;
       newGate.outline = g.outline;
       newGate.type = g.type;
@@ -393,11 +396,16 @@ void mouseReleased() {
     for(int i = 0; i < copy.localGates.size(); i++){
       for(int j = 0; j < copy.localGates.get(i).connections_in.length; j++){
        if(copy.localGates.get(i).connections_in[j] == null) cg.localGates.get(i).connections_in[j] = null;
-       else cg.localGates.get(i).connections_in[j] = new Connection(cg.localGates.get(copy.localGates.indexOf(copy.localGates.get(i).connections_in[j].connector)),copy.localGates.get(i).connections_in[j].inputIndex);
+       else if (copy.localGates.indexOf(copy.localGates.get(i).connections_in[j].connector) != -1) {
+         cg.localGates.get(i).connections_in[j] = new Connection(cg.localGates.get(copy.localGates.indexOf(copy.localGates.get(i).connections_in[j].connector)),copy.localGates.get(i).connections_in[j].inputIndex);
+       } else {
+         cg.localGates.get(i).connections_in[j] = null;
+       }
       }
       
       for(int j = 0; j < copy.localGates.get(i).connections_out.size(); j++){
-        cg.localGates.get(i).connections_out.add(cg.localGates.get(copy.localGates.indexOf(copy.localGates.get(i).connections_out.get(j))));
+        if (copy.localGates.indexOf(copy.localGates.get(i).connections_out.get(j)) != -1)
+          cg.localGates.get(i).connections_out.add(cg.localGates.get(copy.localGates.indexOf(copy.localGates.get(i).connections_out.get(j))));
       }
     }
     notifications.add(new Notification("Blueprint Edit", new String[]{"Blueprint Pasted", cg.name},100,true));
@@ -431,7 +439,7 @@ void mouseReleased() {
     Gate bestGate = null;
     if (outputIndex != -2)
       for (Gate s : gates) {
-        if((s.hidden == false || s.type == "INPUTbp" || s.type == "OUTPUTbp") && s.position.x > -100 && s.position.x < (width+20)/globalScale && s.position.y > -100 && s.position.y < (height+20)/globalScale){
+        if((s.hidden == false || s.type == "INPUTbp" || s.type == "OUTPUTbp" || s.blueprint_input) && s.position.x > -100 && s.position.x < (width+20)/globalScale && s.position.y > -100 && s.position.y < (height+20)/globalScale){
           if(s != editing){
             for (int i = 0; i < s.inputs.size(); i++) {
               float calcDistance = PVector.dist(new PVector(mouseX, mouseY), PVector.mult(PVector.add(s.position, s.inputs.get(i)), globalScale));
