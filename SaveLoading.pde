@@ -116,7 +116,7 @@ void binarySave(File selectedFile) {
       data.writeByte(meta_data); //write meta data
       if (g.poweredFramesMax>0) { //check if power requirements
         data.writeByte(byte(g.poweredFramesLeft));
-        data.writeByte(byte(g.poweredFramesMax));
+        data.writeByte(byte(g.poweredFramesMax-1));
       }
       if (in_group >= 0) { //check if in blueprint
         if (customGates.size() > 255) data.writeByte((in_group >> 8) & 255);
@@ -174,6 +174,7 @@ void binarySave(File selectedFile) {
 
 void binaryLoad(File selectedFile) {
   saved_last = selectedFile;
+  if(selectedFile.length() == 0) return;
   try {
     gates = new ArrayList<Gate>();
     customGates = new ArrayList<CustomGate>();
@@ -208,7 +209,7 @@ void binaryLoad(File selectedFile) {
       Boolean blueprint_bytes_amount = (meta_data.charAt(6)=='1') ? true : false; //assign blueprint bytes amount
       if (powered_frames_needed) {
         g.poweredFramesLeft = data.readUnsignedByte();
-        g.poweredFramesMax = data.readUnsignedByte();
+        g.poweredFramesMax = data.readUnsignedByte()+1;
       }
       if (part_of_blueprint) {
         int index = 0;

@@ -1,5 +1,6 @@
 import java.util.Collections;
 import java.util.stream.IntStream;
+GateUpdater updateThread;
 
 ArrayList<Gate> gates = new ArrayList<Gate>();
 ArrayList<CustomGate> customGates = new ArrayList<CustomGate>();
@@ -51,13 +52,16 @@ void setup() {
   images[6] = loadImage("Data/UI/paste.png");
   
   //notif_shape = loadShape("Data/UI/notifications.svg");
-  notifications.add(new Notification("Welcome", new String[]{"Welcome to Logic Circuit Sim","Ctrl-S -> Save, Ctrl-L -> Load","alpha version"},400,true));
+  notifications.add(new Notification("Welcome", new String[]{"Welcome to Logic Circuit Sim","Ctrl-S -> Save, Ctrl-L -> Load","alpha version"},600,true));
   
   globalOffset = new PVector(0, 0);
   frameRate(60);
   screenRes = new PVector(width,height);
   textSize(20);
   LoadMostRecent();
+  
+  updateThread = new GateUpdater(this);
+  updateThread.start();
 }
 
 void pre() {
@@ -165,12 +169,7 @@ void draw() {
     for (Gate s : gates) {
       s.show(1);
     }
-    IntList gate_update_order = new IntList();
-    for(int i = 0; i < gates.size(); i ++) gate_update_order.append(i);
-    gate_update_order.shuffle();
-    for(int i = 0; i < gates.size(); i ++){
-      gates.get(gate_update_order.get(i)).update();
-    }
+    //updateGates();
     
     if(editing != null){
       drawSnapLocations();
@@ -278,6 +277,15 @@ void draw() {
     updates[0] += 1;
     updates[3] += 1;
   }
+}
+
+void updateGates(){
+ IntList gate_update_order = new IntList();
+    for(int i = 0; i < gates.size(); i ++) gate_update_order.append(i);
+    gate_update_order.shuffle();
+    for(int i = 0; i < gates.size(); i ++){
+      gates.get(gate_update_order.get(i)).update();
+    } 
 }
 
 PVector snapToGrid(int x,int y){

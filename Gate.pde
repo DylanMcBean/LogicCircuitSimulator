@@ -106,10 +106,15 @@ class Gate {
   }
   
   void update(){
-    if(this.shouldCalculatePowered && frameCount != poweredFrame){
+    if(this.type == "INPUT_CLOCK"){
+      this.powered = (millis()%(this.poweredFramesMax*100) < (this.poweredFramesMax*100)/2);
+      this.shouldCalculatePowered = true;
+    }
+    if(this.shouldCalculatePowered){
       calculatePowered();
     }
     powerDown();
+    
   }
   
   boolean inputsNullCheck(){
@@ -125,11 +130,7 @@ class Gate {
       if(this.poweredFramesLeft == 0 && this.powered && this.type != "INPUT_CLOCK"){
         this.powered = false;
         this.shouldCalculatePowered = true;
-      } else if (this.poweredFramesLeft == 0 && this.type == "INPUT_CLOCK"){
-        this.powered = !this.powered;
-        this.shouldCalculatePowered = true;
-        this.poweredFramesLeft = poweredFramesMax;
-      }
+      } 
     }
   }
 
