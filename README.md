@@ -1,7 +1,7 @@
 # LogicCircuitSimulator
 
 ## What is this?
-so you might be wondering what this is, and the easy answer is that is is just a logic cursuit simulator. this is not going to be 100% accurate to real life circuits though; with timing delays and all of that. this is just a fun project i have been working on and thought other people might enjoy playing with it aswell
+so you might be wondering what this is, and the easy answer is that is is just a logic curcuit simulator. this is not going to be 100% accurate to real life circuits though; with timing delays and all of that. this is just a fun project i have been working on and thought other people might enjoy playing with it aswell
 
 ## How can I run this?
 * The first way you can run this is if you have processing you can run the direct source code [Processing Download Page](https://processing.org/download/)
