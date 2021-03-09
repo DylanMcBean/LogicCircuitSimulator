@@ -34,8 +34,7 @@ public static byte[] decompress(byte[] in) {
 
         return out.toByteArray();
     } catch (Exception e) {
-        e.printStackTrace();
-        System.exit(150);
+        e.printStackTrace(); //<>//
         return null;
     }
 }

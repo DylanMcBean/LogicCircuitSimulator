@@ -193,10 +193,10 @@ class Gate {
       break;
     case "CONNECTOR":
       this.texture_off = connector_image;
-      this.shapes.add(new Shape(new PVector[]{new PVector(-8, -8), new PVector(8, 0), new PVector(8, 8), new PVector(0, 8)}));
+      this.shapes.add(new Shape(new PVector[]{new PVector(-5, -5), new PVector(5, 0), new PVector(5, 5), new PVector(0, 5)}));
       inputs.add(new PVector(0, 0));
       outputs.add(new PVector(0, 0));
-      this.size = new PVector(16,16);
+      this.size = new PVector(10,10);
       break;
     case "INPUT":
       this.texture_off = input_image;

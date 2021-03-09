@@ -48,7 +48,7 @@ void LoadMostRecent(){
 int getGlobalLines() {
   if (globalLines == "l turn line") return byte(0);
   if (globalLines == "straight") return byte(1);
-  if (globalLines == "striaght spline") return byte(2);
+  if (globalLines == "straight spline") return byte(2);
   if (globalLines == "spline") return byte(3);
   return 0;
 }
@@ -179,14 +179,22 @@ void binaryLoad(File selectedFile) {
     gates = new ArrayList<Gate>();
     customGates = new ArrayList<CustomGate>();
     byte[] fileData = decompress(loadBytes(selectedFile));
+    
+    //Check if the file has been unzipped or not properly
+    if (fileData == null){
+     notifications.add(new Notification("ERROR", new String[]{"Failed to Load " + saved_last.getName(),"Corrupted Data"},200,false));
+     loop();
+     return;
+    }
+    
     ByteArrayInputStream bais = new ByteArrayInputStream(fileData);
     DataInputStream data = new DataInputStream(bais);
 
     //Load Global Data
     String global_scale_lines = binary(data.readByte());
     int scale = unbinary(global_scale_lines.substring(0, 6));
-    globalScale = map(scale, 0, 55, 0.5, 5);
-    globalLines = setGlobalLines(unbinary(global_scale_lines.substring(6, 8))); 
+    globalScale = float(nf(map(scale, 0, 55, 0.5, 5),0,1));
+    globalLines = setGlobalLines(unbinary(global_scale_lines.substring(6, 8)));  //<>//
     globalOffset = new PVector(data.readFloat(), data.readFloat());
 
     //Load gate amount
@@ -227,7 +235,7 @@ void binaryLoad(File selectedFile) {
           position_index = data.readUnsignedByte();
           input_index = data.readUnsignedByte();
           Connection new_connection = new Connection(null, input_index);
-          new_connection.gateIndex = index;
+          new_connection.gateIndex = index; //<>//
           g.connections_in[position_index] = new_connection;
         }
       }
@@ -259,10 +267,11 @@ void binaryLoad(File selectedFile) {
           name += data.readChar();
         }
         PVector blueprint_pos = new PVector(data.readFloat(), data.readFloat());
-        PVector blueprint_size = new PVector(data.readFloat(), data.readFloat());
+        PVector blueprint_size = PVector.mult(new PVector(data.readFloat(), data.readFloat()),globalScale);
         new_custom_gate = new CustomGate(blueprint_pos, blueprint_size);
         new_custom_gate.minimized = minimized;
         new_custom_gate.name = name;
+        new_custom_gate.size = blueprint_size;
       }
       customGates.add(new_custom_gate);
     }

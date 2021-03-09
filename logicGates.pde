@@ -97,10 +97,10 @@ void line(PVector point1, PVector point2, String type, Boolean os) {
     stroke(255);
   }
   switch(type) { 
-  case "stright": 
+  case "straight": 
     line(point1.x, point1.y, point2.x, point2.y);
     break;
-  case "stright spline":
+  case "straight spline":
     if(max(point2.x,point1.x) - min(point2.x,point1.x) > max(point2.y,point1.y) - min(point2.y,point1.y)) {
       line(point1.x, point1.y, point1.x + (point2.x-point1.x)/3, point1.y);
       line(point1.x + (point2.x-point1.x)/3, point1.y, point2.x - (point2.x-point1.x)/3, point2.y);
@@ -322,6 +322,10 @@ void mousePressed() {
         }
       }
       
+      if(editing != null && editing.type == "INPUT_BUTTON"){
+        editing.powered = true;
+      }
+      
       if(editing == null){
         for (CustomGate s : customGates) {
           if(s.position.x > -100 && s.position.x < (width+20)/globalScale && s.position.y > -100 && s.position.y < (height+20)/globalScale){
@@ -331,7 +335,6 @@ void mousePressed() {
                 outputIndex = -2;
               }
             }
-            //if (outputIndex != -1) break;
           }
         }
       }
@@ -373,9 +376,9 @@ void keyPressed(){
     } else if (key == '2') {
       outputIndex = -3;
     }  else if (key == '3') {
-      if(globalLines == "l turn line") globalLines = "stright";
-      else if(globalLines == "stright") globalLines = "stright spline";
-      else if(globalLines == "stright spline") globalLines = "spline";
+      if(globalLines == "l turn line") globalLines = "straight";
+      else if(globalLines == "straight") globalLines = "straight spline";
+      else if(globalLines == "straight spline") globalLines = "spline";
       else if(globalLines == "spline") globalLines = "l turn line";
     }  else if (key == '4') {
       outputIndex = -4;
@@ -427,7 +430,7 @@ void mouseReleased() {
     customGates.add(cg);
     customGates.get(customGates.size()-1).position = new PVector(mouseX/globalScale,mouseY/globalScale);
     customGates.get(customGates.size()-1).name = copy.name;
-    customGates.get(customGates.size()-1).shapes = copy.shapes; //<>//
+    customGates.get(customGates.size()-1).shapes = copy.shapes;
     customGates.get(customGates.size()-1).locked = copy.locked;
     customGates.get(customGates.size()-1).blueprintSize = copy.blueprintSize;
     customGates.get(customGates.size()-1).minimized = copy.minimized;
@@ -454,8 +457,9 @@ void mouseReleased() {
     }
     for(int i = 0; i < copy.localGates.size(); i++){
       for(int j = 0; j < copy.localGates.get(i).connections_in.length; j++){
-       if(copy.localGates.get(i).connections_in[j] == null) cg.localGates.get(i).connections_in[j] = null;
-       else if (copy.localGates.indexOf(copy.localGates.get(i).connections_in[j].connector) != -1) {
+       if(copy.localGates.get(i).connections_in[j] == null){
+         cg.localGates.get(i).connections_in[j] = null;
+       } else if (copy.localGates.indexOf(copy.localGates.get(i).connections_in[j].connector) != -1) {
          cg.localGates.get(i).connections_in[j] = new Connection(cg.localGates.get(copy.localGates.indexOf(copy.localGates.get(i).connections_in[j].connector)),copy.localGates.get(i).connections_in[j].inputIndex);
        } else {
          cg.localGates.get(i).connections_in[j] = null;
@@ -517,6 +521,7 @@ void mouseReleased() {
         bestGate.calculatePowered();
       }
       else if(bestGate.connections_in[bestIndex] != null) {
+        println(bestGate.connections_in[bestIndex]);
         bestGate.connections_in[bestIndex].connector.connections_out.remove(bestGate);
         bestGate.connections_in[bestIndex] = null;
         bestGate.calculatePowered();
@@ -558,6 +563,11 @@ void mouseReleased() {
     }
   }
   shouldDraw = true;
+}
+
+void exit(){
+ Save(true);
+ super.exit();
 }
 
 void mouseDragged() {
@@ -614,9 +624,9 @@ void mouseClicked() {
   if(mouseX >= 90 && mouseX <= 130 && mouseY >= 5 && mouseY <= 45) creatingCustom = true;
   if(mouseX >= 140 && mouseX <= 170 && mouseY >= 5 && mouseY <= 45) outputIndex = -3;
   if(mouseX >= 190 && mouseX <= 230 && mouseY >= 5 && mouseY <= 45){
-    if(globalLines == "l turn line") globalLines = "stright";
-    else if(globalLines == "stright") globalLines = "stright spline";
-    else if(globalLines == "stright spline") globalLines = "spline";
+    if(globalLines == "l turn line") globalLines = "straight";
+    else if(globalLines == "straight") globalLines = "straight spline";
+    else if(globalLines == "straight spline") globalLines = "spline";
     else if(globalLines == "spline") globalLines = "l turn line";
   }
   if(mouseX >= 240 && mouseX <= 270 && mouseY >= 5 && mouseY <= 45) outputIndex = -4;
@@ -645,10 +655,10 @@ void mouseWheel(MouseEvent event) {
   shouldDraw = true;
 }
 
-void exit(){
- Save(true);
- super.exit();
-}
+//void exit(){
+// Save(true);
+// super.exit();
+//}
 
 void autosave(){
   if(minute() % 5 == 0 && second() > 0 && second() < 10 && millis() > lastSavedMillis + 10000){
