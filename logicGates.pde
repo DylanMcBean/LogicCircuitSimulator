@@ -26,7 +26,7 @@ void setup() {
   size(1400, 800,P2D);
   surface.setResizable(true);
   registerMethod("pre", this);
-  surface.setTitle("Logic Circuit Simulator V2.12 - alpha");
+  surface.setTitle("Logic Circuit Simulator V2.2 - alpha");
   
   loadImages();
   buttons.add(new Button("AND","AND",new String[]{"And Gate","produces a high output","if all inputs are high"},and_gate_image, new PVector(15, buttons.size()*85+15), new PVector(40,40)));
