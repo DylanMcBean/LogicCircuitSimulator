@@ -111,10 +111,9 @@ class Gate {
       this.shouldCalculatePowered = true;
     }
     if(this.shouldCalculatePowered){
-      calculatePowered();
+     this.calculatePowered(); 
     }
     powerDown();
-    
   }
   
   boolean inputsNullCheck(){
@@ -329,20 +328,22 @@ class Gate {
       break;
     }
     
-    for (Gate g : connections_out) {
-      if(g.type == "CONNECTOR" && g.poweredFrame != frameCount){
-        g.poweredFrame = frameCount;
-        g.calculatePowered();
-        g.poweredFrame = -1;
-      } else if (g.type != "CONNECTOR"){
-        g.shouldCalculatePowered = true;
-        g.poweredFrame = frameCount;
-        shouldDraw = true;
+      for (Gate g : connections_out) {
+        if(g.type == "CONNECTOR"){
+          g.shouldCalculatePowered = true;
+          g.calculatePowered();
+          g.poweredFrame = -1;
+        } else if (g.type != "CONNECTOR"){
+          g.shouldCalculatePowered = true; //<>//
+          toBeUpdated.add(g);
+          shouldDraw = true;
+        }
       }
-    }
-    updates[2] += 1;
-    updates[3] += 1;
-    this.shouldCalculatePowered = false;
+      
+      //toBeUpdated.remove(this);
+      
+      updates[2] += 1;
+      updates[3] += 1;
   }
 
   void updateConnections() {

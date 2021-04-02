@@ -12,3 +12,4 @@ If you have any idea of stuff to add, please post it in the issues tab. If I dee
 
 ## Why only windows?
 Suppose you do not have processing to run the direct source code. I'm very sorry but the only built I could get working and test were the windows versions' i will try and get Mac/Apple and Linux versions working shortly.
+

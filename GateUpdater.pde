@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 public class GateUpdater extends Thread{
   logicGates parent;
   GateUpdater(logicGates p){
@@ -11,10 +12,18 @@ public class GateUpdater extends Thread{
       try{
         IntList gate_update_order = new IntList();
         for(int i = 0; i < gates.size(); i ++) gate_update_order.append(i);
-        gate_update_order.shuffle();
+        //gate_update_order.shuffle();
         for(int i = 0; i < gates.size(); i ++){
           gates.get(gate_update_order.get(i)).update();
         }
+        
+        nextUpdate = toBeUpdated;
+        toBeUpdated = new ArrayList<Gate>();
+        for (Gate g : toBeUpdated){
+          g.update(); //<>//
+        }
+        println(toBeUpdated.size());
+        
       } catch(Exception ex) {}
     }  
   }

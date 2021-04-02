@@ -6,6 +6,10 @@ ArrayList<Gate> gates = new ArrayList<Gate>();
 ArrayList<CustomGate> customGates = new ArrayList<CustomGate>();
 ArrayList<Button> buttons = new ArrayList<Button>();
 ArrayList<Notification> notifications = new ArrayList<Notification>();
+
+ArrayList<Gate> nextUpdate = new ArrayList<Gate>();
+ArrayList<Gate> toBeUpdated = new ArrayList<Gate>();
+
 Gate editing;
 PVector editing_movement = new PVector(0,0);
 int outputIndex = -1, lastSavedMillis;
@@ -169,7 +173,6 @@ void draw() {
     for (Gate s : gates) {
       s.show(1);
     }
-    //updateGates();
     
     if(editing != null){
       drawSnapLocations();
@@ -277,15 +280,6 @@ void draw() {
     updates[0] += 1;
     updates[3] += 1;
   }
-}
-
-void updateGates(){
- IntList gate_update_order = new IntList();
-    for(int i = 0; i < gates.size(); i ++) gate_update_order.append(i);
-    gate_update_order.shuffle();
-    for(int i = 0; i < gates.size(); i ++){
-      gates.get(gate_update_order.get(i)).update();
-    } 
 }
 
 PVector snapToGrid(int x,int y){
@@ -654,11 +648,6 @@ void mouseWheel(MouseEvent event) {
   }
   shouldDraw = true;
 }
-
-//void exit(){
-// Save(true);
-// super.exit();
-//}
 
 void autosave(){
   if(minute() % 5 == 0 && second() > 0 && second() < 10 && millis() > lastSavedMillis + 10000){

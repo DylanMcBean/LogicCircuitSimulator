@@ -194,7 +194,7 @@ void binaryLoad(File selectedFile) {
     String global_scale_lines = binary(data.readByte());
     int scale = unbinary(global_scale_lines.substring(0, 6));
     globalScale = float(nf(map(scale, 0, 55, 0.5, 5),0,1));
-    globalLines = setGlobalLines(unbinary(global_scale_lines.substring(6, 8)));  //<>//
+    globalLines = setGlobalLines(unbinary(global_scale_lines.substring(6, 8))); 
     globalOffset = new PVector(data.readFloat(), data.readFloat());
 
     //Load gate amount
@@ -235,7 +235,7 @@ void binaryLoad(File selectedFile) {
           position_index = data.readUnsignedByte();
           input_index = data.readUnsignedByte();
           Connection new_connection = new Connection(null, input_index);
-          new_connection.gateIndex = index; //<>//
+          new_connection.gateIndex = index;
           g.connections_in[position_index] = new_connection;
         }
       }
